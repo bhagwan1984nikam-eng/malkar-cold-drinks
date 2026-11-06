@@ -436,7 +436,14 @@
             let price = parseFloat(document.getElementById('prodPrice').value);
             if(!name || isNaN(price)) return alert('कृपया नाव आणि किंमत भरा.');
 
-            let item = { name, price, icon: "🥤" };
+            let icon = "🥤";
+            let lowerName = name.toLowerCase();
+            if(lowerName.includes("kokum")) icon = "🍷";
+            else if(lowerName.includes("orange")) icon = "🍊";
+            else if(lowerName.includes("pineapple")) icon = "🍍";
+            else if(lowerName.includes("mango")) icon = "🥭";
+
+            let item = { name, price, icon };
             if(id) item.id = parseInt(id);
 
             getStore('products', 'readwrite').put(item).onsuccess = () => {
@@ -444,6 +451,7 @@
                 loadProducts();
             };
         }
+
 
         function editProduct(id, name, price) {
             document.getElementById('prodId').value = id;
