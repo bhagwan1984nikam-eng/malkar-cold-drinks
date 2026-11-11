@@ -32,7 +32,7 @@
         button.btn-secondary { background: var(--secondary); color: white; }
         button.btn-edit { background: var(--warning); color: white; padding: 5px 8px; font-size: 0.78rem; border: none; border-radius: 5px; cursor: pointer; margin-right: 2px; }
         button.btn-danger { background: var(--danger); color: white; padding: 5px 8px; font-size: 0.78rem; border: none; border-radius: 5px; cursor: pointer; }
-        button.btn-jump { background: #3f51b5; color: white; padding: 4px 6px; font-size: 0.78rem; border: none; border-radius: 5px; cursor: pointer; margin-right: 2px; }
+        button.btn-jump { background: #3f51b5; color: white; padding: 5px 8px; font-size: 0.78rem; border: none; border-radius: 5px; cursor: pointer; margin-right: 2px; }
         button.btn-whatsapp { background: #128c7e; color: white; padding: 12px; font-size: 0.95rem; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         
         .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin-top: 10px; }
@@ -380,8 +380,8 @@
             { name: "Family pack mango", price: 125, image: "family_mango.png" }
         ];
 
-        // Database version set to 47
-        const req = indexedDB.open("KalidasIceCreamDB", 47);
+        // Database version permanently set to 50
+        const req = indexedDB.open("KalidasIceCreamDB", 50);
         req.onerror = e => console.log("Database error");
         req.onsuccess = e => { db = e.target.result; initApp(); };
         req.onupgradeneeded = e => {
@@ -579,12 +579,13 @@
             }
         }
 
+        // दुकानांचा क्रम सहज बदलण्याचे फंकशन
         function jumpShop(id, currentIdx, totalShops) {
             let targetNum = prompt(`हे दुकान कितव्या क्रमांकावर न्यायचे आहे? (1 ते ${totalShops} मधील नंबर टाका):`, currentIdx + 1);
             if(targetNum === null) return;
             let targetIdx = parseInt(targetNum) - 1;
             if(isNaN(targetIdx) || targetIdx < 0 || targetIdx >= totalShops) {
-                return alert('कृपया वैध (योग्य) नंबर टाका!');
+                return alert('कृपया योग्य नंबर टाका!');
             }
 
             getStore('shops', 'readonly').getAll().onsuccess = e => {
@@ -966,8 +967,7 @@
                         });
                         csvContent += `"${grandQty}","${grandAmt.toFixed(2)}"\n`;
 
-                        // 🛠️ थेट WhatsApp शेअरिंग बटण (कोणतीही डाऊनलोड प्रक्रिया नाही)
-                        html += `<button class="btn-whatsapp" onclick="shareCSVDirect('${displayDate}', \`${encodeURIComponent(csvContent)}\`)">📎 एक्सेल CSV फाईल थेट WhatsApp वर पाठवा</button>`;
+                        html += `<button class="btn-whatsapp" onclick="exportCSVReport('${displayDate}', \`${encodeURIComponent(csvContent)}\`)">📎 एक्सेल CSV फाईल डाउनलोड करा</button>`;
 
                         document.getElementById('dateReportOutput').innerHTML = html;
                     };
@@ -975,24 +975,13 @@
             };
         }
 
-        // थेट WhatsApp वर फाईल किंवा मजकूर पाठवणारे आधुनिक फंक्शन
-        function shareCSVDirect(displayDate, encodedCsv) {
+        function exportCSVReport(displayDate, encodedCsv) {
             let csvText = decodeURIComponent(encodedCsv);
-            let file = new File([csvText], `Kalidas_Report_${displayDate}.csv`, { type: 'text/csv;charset=utf-8;' });
-            
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                navigator.share({
-                    title: `कालिदास आईस्क्रीम अहवाल (${displayDate})`,
-                    text: `कालिदास आईस्क्रीम - दिनांक: ${displayDate}`,
-                    files: [file]
-                }).catch((err) => {
-                    console.log('Share error:', err);
-                });
-            } else {
-                // जर ब्राउझर थेट शेअरिंग सपोर्ट करत नसेल तर WhatsApp वर मजकूर पाठवण्यासाठी लिंक उघडेल
-                let whatsappUrl = `https://api.whatsapp.com/send?text=` + encodeURIComponent(`कालिदास आईस्क्रीम अहवाल (${displayDate})\n\nटीप: तुमच्या ब्राझरमुळे थेट फाईल शेअर होत नाही, कृपया अहवाल तपासून घ्या.`);
-                window.open(whatsappUrl, '_blank');
-            }
+            let blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+            let l = document.createElement('a');
+            l.href = URL.createObjectURL(blob);
+            l.download = `Kalidas_Report_${displayDate}.csv`;
+            l.click();
         }
 
         function exportCSV() {
