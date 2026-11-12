@@ -1,0 +1,15 @@
+{
+  "name": "Malkar Cold Drinks Orders",
+  "short_name": "Malkar",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0288d1",
+  "icons": [
+    {
+      "src": "icon.webp",
+      "sizes": "192x192",
+      "type": "image/webp"
+    }
+  ]
+}
